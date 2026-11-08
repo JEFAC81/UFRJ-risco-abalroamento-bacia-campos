@@ -11,12 +11,10 @@ O limite de 30 nós é um filtro operacional a validar na dissertação; NÃO
 reconstrói a trajetória real e não representa prova de erro de medição.
 """
 from pathlib import Path
+import argparse
 import numpy as np
 import pandas as pd
 
-BASE = Path(r"C:\Users\Jeferson\Desktop\Dados Brutos_Movimento_Embarcações_BC_(ABR a SET2014)")
-ENTRADA = BASE / "Input" / "201407.ldr"
-SAIDA = BASE / "Output_VF"
 PREFIXO = "07"
 MES = "201407"
 LIMITE_NOS = 30.0
@@ -82,7 +80,9 @@ def velocidade_implicita_nos(lat0, lon0, lat1, lon1, segundos):
     return distancia_m / segundos * (3600 / 1852)
 
 
-def main():
+def main(base: Path):
+    ENTRADA = base / "Input" / "201407.ldr"
+    SAIDA = base / "Output_VF"
     if not ENTRADA.is_file():
         raise FileNotFoundError(f"Arquivo AIS não encontrado: {ENTRADA}")
     SAIDA.mkdir(exist_ok=True, parents=True)
@@ -177,4 +177,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Interpolação mensal de entradas AIS")
+    parser.add_argument("--base", required=True, type=Path,
+                        help="Diretório de trabalho contendo Input/ e Output_VF/")
+    args = parser.parse_args()
+    main(args.base.expanduser().resolve())
